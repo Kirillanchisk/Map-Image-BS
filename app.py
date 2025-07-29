@@ -1,79 +1,86 @@
 import streamlit as st
-import os
 from PIL import Image
+import subprocess
+import os
 
-st.set_page_config(page_title="Map Image", layout="centered")
+st.set_page_config(page_title="Map Image Converter", layout="centered", initial_sidebar_state="auto")
 
-# ===== Стили =====
+# --- Стилизация (темный фон с градиентом)
 st.markdown("""
-    <style>
-    body {
-        background: linear-gradient(135deg, #1f1f1f, #2c2c2c);
+<style>
+    .main {
+        background: linear-gradient(135deg, #2f2f2f, #1a1a1a);
         color: white;
+        min-height: 100vh;
+        padding: 2rem;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
-    .center {
-        text-align: center;
-        margin-top: 2rem;
-    }
-    .btn {
-        background-color: #00cc66;
+    .stButton>button {
+        background-color: #4CAF50;
         color: white;
+        border-radius: 12px;
+        padding: 0.75rem 1.5rem;
+        font-size: 1.2rem;
+        font-weight: 600;
         border: none;
-        padding: 1rem 2rem;
-        font-size: 1.1rem;
-        font-family: 'Segoe UI', sans-serif;
-        border-radius: 8px;
+        transition: background-color 0.3s ease;
+    }
+    .stButton>button:hover {
+        background-color: #45a049;
         cursor: pointer;
-        transition: 0.3s;
-        margin: 1rem;
     }
-    .btn:hover {
-        background-color: #00b359;
+    .stFileUploader>div>input {
+        color: white;
     }
-    .footer {
-        font-size: 0.75rem;
-        text-align: center;
-        color: #aaa;
-        margin-top: 3rem;
+    footer, header, .css-18e3th9 {
+        visibility: hidden;
+        height: 0;
     }
-    </style>
+</style>
 """, unsafe_allow_html=True)
 
-# ===== Заголовок и логотип =====
-st.markdown("""
-<div class="center">
-    <img src="logo.png" width="100">
-    <h1>Map Image</h1>
-</div>
-""", unsafe_allow_html=True)
+st.markdown('<div class="main">', unsafe_allow_html=True)
 
-# ===== Загрузка изображения =====
+st.title("Map Image")
+
 uploaded_file = st.file_uploader("Загрузить изображение", type=["png", "jpg", "jpeg"])
+
 if uploaded_file is not None:
-    with open("output_map.png", "wb") as f:
-        f.write(uploaded_file.read())
+    # Сохраняем загруженный файл локально
+    with open("input_image.png", "wb") as f:
+        f.write(uploaded_file.getbuffer())
 
-    st.image("output_map.png", caption="Загруженное изображение", use_container_width=True)
+    st.image("input_image.png", caption="Исходное изображение", use_container_width=True)
 
-    # ===== Кнопка "Добавить фон" =====
-    if st.button("Добавить фон"):
+    if st.button("Преобразовать в карту"):
+        # Запускаем map_converter.py (предполагается, что он есть в проекте)
         try:
-            os.system("python export.py")
+            # Подключаем map_converter.py как модуль или запускаем subprocess
+            # Запуск через subprocess для изоляции
+            subprocess.run(
+                ["python3", "map_converter.py", "input_image.png", "output_map.png"],
+                check=True
+            )
+            st.success("Карта успешно создана!")
+            st.image("output_map.png", caption="Карта", use_container_width=True)
+        except subprocess.CalledProcessError as e:
+            st.error(f"Ошибка при конвертации изображения: {e}")
 
-            if os.path.exists("final_image.png"):
-                st.image("final_image.png", caption="Финальный результат", use_container_width=True)
-            else:
-                st.error("Файл final_image.png не найден. Проверь работу export.py.")
-        except Exception as e:
-            st.error(f"Произошла ошибка при обработке изображения: {e}")
+    if os.path.exists("output_map.png"):
+        if st.button("Добавить фон"):
+            try:
+                subprocess.run(["python3", "export.py"], check=True)
+                st.success("Фон успешно добавлен!")
+                st.image("final_image.png", caption="Финальное изображение", use_container_width=True)
+            except subprocess.CalledProcessError as e:
+                st.error(f"Ошибка при добавлении фона: {e}")
 
-# ===== Футер с лицензией =====
 st.markdown("""
-    <div class="footer">
-        Контент создан при поддержке Brawl Stars Вики.<br>
-        Данный контент не связан с компанией Supercell, не поддерживается, не спонсируется и не был утвержден ею, и компания Supercell не несет за него ответственность.<br>
-        <a href="https://supercell.com/en/fan-content-policy/" target="_blank" style="color: #00cc66;">
-            Правила Supercell для фанатского контента
-        </a>
-    </div>
+<footer style="color: #aaa; font-size: 0.8rem; margin-top: 3rem;">
+    © Brawl Stars Вики<br>
+    Данный контент не связан с компанией Supercell, не поддерживается, не спонсируется и не был утвержден ею, и компания Supercell не несет за него ответственность.
+    Для получения большей информации смотрите <a href="https://supercell.com/en/fan-content-policy/" target="_blank" style="color:#4CAF50;">Правила Supercell для фанатского контента</a>.
+</footer>
 """, unsafe_allow_html=True)
+
+st.markdown('</div>', unsafe_allow_html=True)
