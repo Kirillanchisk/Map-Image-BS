@@ -10,8 +10,7 @@ st.markdown("""
 @import url('https://fonts.googleapis.com/css2?family=Inter&display=swap&subset=cyrillic');
 
 body, #root > div {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
-                 Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    font-family: 'Inter', sans-serif;
     background-color: #2f2f2f;
     color: white;
 }
@@ -72,9 +71,13 @@ footer a:hover {
 
 st.markdown('<h1>MAP IMAGE</h1>', unsafe_allow_html=True)
 
-uploaded_file = st.file_uploader("ЗАГРУЗИТЬ ИЗОБРАЖЕНИЕ", type=["png", "jpg", "jpeg"])
+# Состояния
+if "converted" not in st.session_state:
+    st.session_state.converted = False
+if "background_added" not in st.session_state:
+    st.session_state.background_added = False
 
-background_added = False
+uploaded_file = st.file_uploader("ЗАГРУЗИТЬ ИЗОБРАЖЕНИЕ", type=["png", "jpg", "jpeg"])
 
 if uploaded_file is not None:
     with open("input_image.png", "wb") as f:
@@ -88,34 +91,36 @@ if uploaded_file is not None:
                 ["python3", "map_converter.py", "input_image.png", "output_map.png"],
                 check=True
             )
+            st.session_state.converted = True
             st.success("КАРТА УСПЕШНО СОЗДАНА!")
             st.image("output_map.png", caption="КАРТА С ПРОЗРАЧНЫМ ФОНОМ", use_container_width=True)
-
-            # Только после успешной конвертации показываем кнопку ДОБАВИТЬ ФОН?
-            if st.button("ДОБАВИТЬ ФОН?"):
-                try:
-                    subprocess.run(["python3", "export.py"], check=True)
-                    st.success("ФОН УСПЕШНО ДОБАВЛЕН!")
-                    st.image("final_image.png", caption="КАРТА С ФОНОМ", use_container_width=True)
-                    background_added = True
-                except subprocess.CalledProcessError as e:
-                    st.error(f"ОШИБКА ПРИ ДОБАВЛЕНИИ ФОНА: {e}")
-
         except subprocess.CalledProcessError as e:
             st.error(f"ОШИБКА ПРИ КОНВЕРТАЦИИ ИЗОБРАЖЕНИЯ: {e}")
 
-    download_path = "final_image.png" if os.path.exists("final_image.png") else \
-                    "output_map.png" if os.path.exists("output_map.png") else None
+if st.session_state.converted and os.path.exists("output_map.png"):
+    if st.button("ДОБАВИТЬ ФОН?"):
+        try:
+            subprocess.run(["python3", "export.py"], check=True)
+            st.session_state.background_added = True
+            st.success("ФОН УСПЕШНО ДОБАВЛЕН!")
+            st.image("final_image.png", caption="КАРТА С ФОНОМ", use_container_width=True)
+        except subprocess.CalledProcessError as e:
+            st.error(f"ОШИБКА ПРИ ДОБАВЛЕНИИ ФОНА: {e}")
 
-    if download_path:
-        with open(download_path, "rb") as file:
-            st.download_button(
-                label="СКАЧАТЬ",
-                data=file,
-                file_name=download_path,
-                mime="image/png",
-                key="download-btn"
-            )
+download_path = None
+if st.session_state.background_added and os.path.exists("final_image.png"):
+    download_path = "final_image.png"
+elif st.session_state.converted and os.path.exists("output_map.png"):
+    download_path = "output_map.png"
+
+if download_path:
+    with open(download_path, "rb") as file:
+        st.download_button(
+            label="СКАЧАТЬ",
+            data=file,
+            file_name=download_path,
+            mime="image/png"
+        )
 
 st.markdown("""
 <footer>
