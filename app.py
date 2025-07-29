@@ -8,12 +8,20 @@ st.set_page_config(page_title="Map Image Converter", layout="centered", initial_
 # --- Стилизация (темный фон с градиентом)
 st.markdown("""
 <style>
-    .main {
+    html, body, #root > div {
+        height: 100%;
+        margin: 0;
+        padding: 0;
         background: linear-gradient(135deg, #2f2f2f, #1a1a1a);
         color: white;
-        min-height: 100vh;
-        padding: 2rem;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .block-container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+        max-width: 700px;
+        margin-left: auto;
+        margin-right: auto;
     }
     .stButton>button {
         background-color: #4CAF50;
@@ -29,12 +37,18 @@ st.markdown("""
         background-color: #45a049;
         cursor: pointer;
     }
-    .stFileUploader>div>input {
-        color: white;
+    footer {
+        color: #aaa;
+        font-size: 0.8rem;
+        margin-top: 3rem;
+        text-align: center;
     }
-    footer, header, .css-18e3th9 {
-        visibility: hidden;
-        height: 0;
+    footer a {
+        color: #4CAF50;
+        text-decoration: none;
+    }
+    footer a:hover {
+        text-decoration: underline;
     }
 </style>
 """, unsafe_allow_html=True)
