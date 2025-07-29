@@ -74,7 +74,6 @@ st.markdown('<h1>MAP IMAGE</h1>', unsafe_allow_html=True)
 
 uploaded_file = st.file_uploader("ЗАГРУЗИТЬ ИЗОБРАЖЕНИЕ", type=["png", "jpg", "jpeg"])
 
-converted = False
 background_added = False
 
 if uploaded_file is not None:
@@ -91,22 +90,24 @@ if uploaded_file is not None:
             )
             st.success("КАРТА УСПЕШНО СОЗДАНА!")
             st.image("output_map.png", caption="КАРТА С ПРОЗРАЧНЫМ ФОНОМ", use_container_width=True)
-            converted = True
+
+            # Только после успешной конвертации показываем кнопку ДОБАВИТЬ ФОН?
+            if st.button("ДОБАВИТЬ ФОН?"):
+                try:
+                    subprocess.run(["python3", "export.py"], check=True)
+                    st.success("ФОН УСПЕШНО ДОБАВЛЕН!")
+                    st.image("final_image.png", caption="КАРТА С ФОНОМ", use_container_width=True)
+                    background_added = True
+                except subprocess.CalledProcessError as e:
+                    st.error(f"ОШИБКА ПРИ ДОБАВЛЕНИИ ФОНА: {e}")
+
         except subprocess.CalledProcessError as e:
             st.error(f"ОШИБКА ПРИ КОНВЕРТАЦИИ ИЗОБРАЖЕНИЯ: {e}")
 
-    if os.path.exists("output_map.png"):
-        if st.button("ДОБАВИТЬ ФОН?"):
-            try:
-                subprocess.run(["python3", "export.py"], check=True)
-                st.success("ФОН УСПЕШНО ДОБАВЛЕН!")
-                st.image("final_image.png", caption="КАРТА С ФОНОМ", use_container_width=True)
-                background_added = True
-            except subprocess.CalledProcessError as e:
-                st.error(f"ОШИБКА ПРИ ДОБАВЛЕНИИ ФОНА: {e}")
+    download_path = "final_image.png" if os.path.exists("final_image.png") else \
+                    "output_map.png" if os.path.exists("output_map.png") else None
 
-    download_path = "final_image.png" if background_added and os.path.exists("final_image.png") else "output_map.png"
-    if os.path.exists(download_path):
+    if download_path:
         with open(download_path, "rb") as file:
             st.download_button(
                 label="СКАЧАТЬ",
