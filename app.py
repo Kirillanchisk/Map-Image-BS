@@ -3,7 +3,7 @@ from PIL import Image
 import subprocess
 import os
 
-st.set_page_config(page_title="Map Image Converter", layout="centered", initial_sidebar_state="auto")
+st.set_page_config(page_title="Map Image by BSW", layout="centered", initial_sidebar_state="auto")
 
 st.markdown("""
 <style>
@@ -16,12 +16,26 @@ body, #root > div {
     color: white;
 }
 
-.block-container {
-    padding-top: 2rem;
-    padding-bottom: 2rem;
+.main {
     max-width: 700px;
     margin-left: auto;
     margin-right: auto;
+    padding: 2rem 1rem;
+    text-align: center;
+}
+
+.logo {
+    width: 120px;
+    margin: 0 auto 1rem auto;
+}
+
+h1, .stButton>button, .css-1y4p8pa {
+    font-family: 'Inter', sans-serif;
+}
+
+h1 {
+    font-weight: 700;
+    margin-bottom: 1.5rem;
 }
 
 .stButton>button {
@@ -30,10 +44,13 @@ body, #root > div {
     border-radius: 12px;
     padding: 0.75rem 1.5rem;
     font-size: 1.2rem;
-    font-weight: 600;
+    font-weight: 700;
     border: none;
     font-family: 'Inter', sans-serif;
     transition: background-color 0.3s ease;
+    margin: 0.5rem auto;
+    display: block;
+    min-width: 220px;
 }
 
 .stButton>button:hover {
@@ -57,14 +74,22 @@ footer a {
 footer a:hover {
     text-decoration: underline;
 }
+
 </style>
 """, unsafe_allow_html=True)
 
 st.markdown('<div class="main">', unsafe_allow_html=True)
 
-st.title("Map Image")
+if os.path.exists("logo.png"):
+    logo_img = Image.open("logo.png")
+    st.image(logo_img, width=120, use_column_width=False)
 
-uploaded_file = st.file_uploader("ЗАГРУЗИТЬ ИЗОБРАЖЕНИЕ", type=["png", "jpg", "jpeg"])
+st.title("MAP IMAGE")
+
+uploaded_file = st.file_uploader("ЗАГРУЗИТЬ ИЗОБРАЖЕНИЕ", type=["png", "jpg", "jpeg"], label_visibility="visible")
+
+converted = False
+background_added = False
 
 if uploaded_file is not None:
     with open("input_image.png", "wb") as f:
@@ -72,7 +97,7 @@ if uploaded_file is not None:
 
     st.image("input_image.png", caption="ИСХОДНОЕ ИЗОБРАЖЕНИЕ", use_container_width=True)
 
-    if st.button("Преобразовать в карту"):
+    if st.button("ПРЕОБРАЗОВАТЬ В КАРТУ"):
         try:
             subprocess.run(
                 ["python3", "map_converter.py", "input_image.png", "output_map.png"],
@@ -80,6 +105,7 @@ if uploaded_file is not None:
             )
             st.success("КАРТА УСПЕШНО СОЗДАНА!")
             st.image("output_map.png", caption="КАРТА С ПРОЗРАЧНЫМ ФОНОМ", use_container_width=True)
+            converted = True
         except subprocess.CalledProcessError as e:
             st.error(f"ОШИБКА ПРИ КОНВЕРТАЦИИ ИЗОБРАЖЕНИЯ: {e}")
 
@@ -89,12 +115,25 @@ if uploaded_file is not None:
                 subprocess.run(["python3", "export.py"], check=True)
                 st.success("ФОН УСПЕШНО ДОБАВЛЕН!")
                 st.image("final_image.png", caption="КАРТА С ФОНОМ", use_container_width=True)
+                background_added = True
             except subprocess.CalledProcessError as e:
                 st.error(f"ОШИБКА ПРИ ДОБАВЛЕНИИ ФОНА: {e}")
 
+    if converted or background_added:
+        download_path = "final_image.png" if background_added and os.path.exists("final_image.png") else "output_map.png"
+        if os.path.exists(download_path):
+            with open(download_path, "rb") as file:
+                st.download_button(
+                    label="СКАЧАТЬ",
+                    data=file,
+                    file_name=download_path,
+                    mime="image/png",
+                    key="download-btn"
+                )
+
 st.markdown("""
 <footer style="color: #aaa; font-size: 0.8rem; margin-top: 3rem;">
-    © Brawl Stars Вики<br>
+    © Brawl Stars Вики<br><br>
     Данный контент не связан с компанией Supercell, не поддерживается, не спонсируется и не был утвержден ею, и компания Supercell не несет за него ответственность.
     Для получения большей информации смотрите <a href="https://supercell.com/en/fan-content-policy/" target="_blank" style="color:#4CAF50;">Правила Supercell для фанатского контента</a>.
 </footer>
