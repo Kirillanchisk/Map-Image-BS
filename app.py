@@ -25,17 +25,17 @@ body, #root > div {
 }
 
 .logo {
-    width: 120px;
+    display: block;
     margin: 0 auto 1rem auto;
-}
-
-h1, .stButton>button, .css-1y4p8pa {
-    font-family: 'Inter', sans-serif;
+    width: 100px !important;
+    height: auto !important;
 }
 
 h1 {
     font-weight: 700;
     margin-bottom: 1.5rem;
+    text-align: center;
+    font-size: 2.5rem;
 }
 
 .stButton>button {
@@ -58,6 +58,16 @@ h1 {
     cursor: pointer;
 }
 
+.download-button > button {
+    background-color: #2196F3;
+    margin-top: 1rem;
+    min-width: 160px;
+}
+
+.download-button > button:hover {
+    background-color: #0b7dda;
+}
+
 footer {
     color: #aaa;
     font-size: 0.8rem;
@@ -74,7 +84,6 @@ footer a {
 footer a:hover {
     text-decoration: underline;
 }
-
 </style>
 """, unsafe_allow_html=True)
 
@@ -82,9 +91,9 @@ st.markdown('<div class="main">', unsafe_allow_html=True)
 
 if os.path.exists("logo.png"):
     logo_img = Image.open("logo.png")
-    st.image(logo_img, width=120, use_column_width=False)
+    st.image(logo_img, use_column_width=False, width=100)
 
-st.title("MAP IMAGE")
+st.markdown("<h1>MAP IMAGE</h1>", unsafe_allow_html=True)
 
 uploaded_file = st.file_uploader("ЗАГРУЗИТЬ ИЗОБРАЖЕНИЕ", type=["png", "jpg", "jpeg"], label_visibility="visible")
 
@@ -109,7 +118,7 @@ if uploaded_file is not None:
         except subprocess.CalledProcessError as e:
             st.error(f"ОШИБКА ПРИ КОНВЕРТАЦИИ ИЗОБРАЖЕНИЯ: {e}")
 
-    if os.path.exists("output_map.png"):
+    if os.path.exists("output_map.png") and converted:
         if st.button("ДОБАВИТЬ ФОН?"):
             try:
                 subprocess.run(["python3", "export.py"], check=True)
@@ -119,7 +128,7 @@ if uploaded_file is not None:
             except subprocess.CalledProcessError as e:
                 st.error(f"ОШИБКА ПРИ ДОБАВЛЕНИИ ФОНА: {e}")
 
-    if converted or background_added:
+    if (converted or background_added):
         download_path = "final_image.png" if background_added and os.path.exists("final_image.png") else "output_map.png"
         if os.path.exists(download_path):
             with open(download_path, "rb") as file:
@@ -128,7 +137,8 @@ if uploaded_file is not None:
                     data=file,
                     file_name=download_path,
                     mime="image/png",
-                    key="download-btn"
+                    key="download-btn",
+                    help="Скачать текущее изображение"
                 )
 
 st.markdown("""
