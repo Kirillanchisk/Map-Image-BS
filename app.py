@@ -50,21 +50,22 @@ st.markdown("""
 # ===== Загрузка изображения =====
 uploaded_file = st.file_uploader("Загрузить изображение", type=["png", "jpg", "jpeg"])
 if uploaded_file is not None:
-    with open("input_image.png", "wb") as f:
+    with open("output_map.png", "wb") as f:
         f.write(uploaded_file.read())
 
-    st.image("input_image.png", caption="Исходное изображение", use_container_width=True)
+    st.image("output_map.png", caption="Загруженное изображение", use_container_width=True)
 
-    # ===== Кнопка Добавить фон =====
-    if st.button("Добавить фон", type="primary"):
+    # ===== Кнопка "Добавить фон" =====
+    if st.button("Добавить фон"):
         try:
             os.system("python export.py")
-            if os.path.exists("final_output.png"):
-                st.image("final_output.png", caption="Финальный результат", use_container_width=True)
+
+            if os.path.exists("final_image.png"):
+                st.image("final_image.png", caption="Финальный результат", use_container_width=True)
             else:
-                st.error("Файл final_output.png не найден. Убедись, что скрипт export.py отработал корректно.")
+                st.error("Файл final_image.png не найден. Проверь работу export.py.")
         except Exception as e:
-            st.error(f"Ошибка при обработке: {e}")
+            st.error(f"Произошла ошибка при обработке изображения: {e}")
 
 # ===== Футер с лицензией =====
 st.markdown("""
