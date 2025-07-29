@@ -1,75 +1,78 @@
 import streamlit as st
-from PIL import Image
 import os
+from PIL import Image
 
 st.set_page_config(page_title="Map Image", layout="centered")
 
+# ===== Стили =====
 st.markdown("""
     <style>
     body {
-        background: linear-gradient(135deg, #1c1c1c, #2a2a2a);
+        background: linear-gradient(135deg, #1f1f1f, #2c2c2c);
         color: white;
-        font-family: 'Segoe UI', sans-serif;
     }
-    .main {
-        padding-top: 50px;
+    .center {
+        text-align: center;
+        margin-top: 2rem;
     }
-    .upload-btn {
-        background-color: #22c55e;
+    .btn {
+        background-color: #00cc66;
         color: white;
         border: none;
-        padding: 12px 24px;
-        border-radius: 25px;
-        font-size: 18px;
-        font-weight: 600;
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+        font-family: 'Segoe UI', sans-serif;
+        border-radius: 8px;
         cursor: pointer;
-        transition: background-color 0.3s ease;
+        transition: 0.3s;
+        margin: 1rem;
     }
-    .upload-btn:hover {
-        background-color: #16a34a;
+    .btn:hover {
+        background-color: #00b359;
     }
     .footer {
-        font-size: 12px;
-        color: #aaa;
-        margin-top: 80px;
+        font-size: 0.75rem;
         text-align: center;
-    }
-    .footer a {
         color: #aaa;
-        text-decoration: underline;
+        margin-top: 3rem;
     }
     </style>
 """, unsafe_allow_html=True)
 
-logo_path = "logo.png"
-if os.path.exists(logo_path):
-    st.image(logo_path, width=120)
-
+# ===== Заголовок и логотип =====
 st.markdown("""
-    <h1 style='text-align: center; font-size: 48px; margin-bottom: 30px;'>Map Image</h1>
+<div class="center">
+    <img src="logo.png" width="100">
+    <h1>Map Image</h1>
+</div>
 """, unsafe_allow_html=True)
 
-st.markdown("<div style='text-align: center;'>", unsafe_allow_html=True)
-input_file = st.file_uploader(" ", type=["png"], label_visibility="collapsed")
-if input_file:
+# ===== Загрузка изображения =====
+uploaded_file = st.file_uploader("Загрузить изображение", type=["png", "jpg", "jpeg"])
+if uploaded_file is not None:
     with open("input_image.png", "wb") as f:
-        f.write(input_file.read())
-    st.image("input_image.png", caption="Загруженное изображение", use_column_width=True)
-    os.system("python map_converter.py input_image.png output_map.png")
-    st.success("Изображение преобразовано!")
-    st.image("output_map.png", caption="Результат", use_column_width=True)
+        f.write(uploaded_file.read())
 
-    if st.button("Добавить фон", key="bg_button"):
-        os.system("python export.py")
-        st.success("Фон добавлен!")
-        st.image("final_output.png", caption="Финальный результат", use_column_width=True)
+    st.image("input_image.png", caption="Исходное изображение", use_container_width=True)
 
-st.markdown("</div>", unsafe_allow_html=True)
+    # ===== Кнопка Добавить фон =====
+    if st.button("Добавить фон", type="primary"):
+        try:
+            os.system("python export.py")
+            if os.path.exists("final_output.png"):
+                st.image("final_output.png", caption="Финальный результат", use_container_width=True)
+            else:
+                st.error("Файл final_output.png не найден. Убедись, что скрипт export.py отработал корректно.")
+        except Exception as e:
+            st.error(f"Ошибка при обработке: {e}")
 
+# ===== Футер с лицензией =====
 st.markdown("""
     <div class="footer">
-        <p>Контент предоставлен Brawl Stars Wiki</p>
-        <p>Данный контент не связан с компанией Supercell, не поддерживается, не спонсируется и не был утвержден ею, и компания Supercell не несет за него ответственность.<br>
-        Для получения большей информации смотрите <a href="https://supercell.com/en/fan-content-policy/" target="_blank">Правила Supercell для фанатского контента</a>.</p>
+        Контент создан при поддержке Brawl Stars Вики.<br>
+        Данный контент не связан с компанией Supercell, не поддерживается, не спонсируется и не был утвержден ею, и компания Supercell не несет за него ответственность.<br>
+        <a href="https://supercell.com/en/fan-content-policy/" target="_blank" style="color: #00cc66;">
+            Правила Supercell для фанатского контента
+        </a>
     </div>
 """, unsafe_allow_html=True)
