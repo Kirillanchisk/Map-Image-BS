@@ -16,29 +16,24 @@ body, #root > div {
     color: white;
 }
 
-.main {
+.block-container {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
     max-width: 700px;
     margin-left: auto;
     margin-right: auto;
-    padding: 2rem 1rem;
-    text-align: center;
-}
-
-.logo {
-    display: block;
-    margin: 0 auto 1rem auto;
-    width: 100px !important;
-    height: auto !important;
 }
 
 h1 {
-    font-weight: 700;
-    margin-bottom: 1.5rem;
     text-align: center;
-    font-size: 2.5rem;
+    font-weight: 800;
+    font-size: 3rem;
+    margin-bottom: 2rem;
 }
 
 .stButton>button {
+    display: block;
+    margin: 1rem auto;
     background-color: #4CAF50;
     color: white;
     border-radius: 12px;
@@ -48,24 +43,12 @@ h1 {
     border: none;
     font-family: 'Inter', sans-serif;
     transition: background-color 0.3s ease;
-    margin: 0.5rem auto;
-    display: block;
-    min-width: 220px;
+    min-width: 240px;
 }
 
 .stButton>button:hover {
     background-color: #45a049;
     cursor: pointer;
-}
-
-.download-button > button {
-    background-color: #2196F3;
-    margin-top: 1rem;
-    min-width: 160px;
-}
-
-.download-button > button:hover {
-    background-color: #0b7dda;
 }
 
 footer {
@@ -87,15 +70,9 @@ footer a:hover {
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="main">', unsafe_allow_html=True)
+st.markdown('<h1>MAP IMAGE</h1>', unsafe_allow_html=True)
 
-if os.path.exists("logo.png"):
-    logo_img = Image.open("logo.png")
-    st.image(logo_img, use_column_width=False, width=100)
-
-st.markdown("<h1>MAP IMAGE</h1>", unsafe_allow_html=True)
-
-uploaded_file = st.file_uploader("ЗАГРУЗИТЬ ИЗОБРАЖЕНИЕ", type=["png", "jpg", "jpeg"], label_visibility="visible")
+uploaded_file = st.file_uploader("ЗАГРУЗИТЬ ИЗОБРАЖЕНИЕ", type=["png", "jpg", "jpeg"])
 
 converted = False
 background_added = False
@@ -118,7 +95,7 @@ if uploaded_file is not None:
         except subprocess.CalledProcessError as e:
             st.error(f"ОШИБКА ПРИ КОНВЕРТАЦИИ ИЗОБРАЖЕНИЯ: {e}")
 
-    if os.path.exists("output_map.png") and converted:
+    if os.path.exists("output_map.png"):
         if st.button("ДОБАВИТЬ ФОН?"):
             try:
                 subprocess.run(["python3", "export.py"], check=True)
@@ -128,25 +105,21 @@ if uploaded_file is not None:
             except subprocess.CalledProcessError as e:
                 st.error(f"ОШИБКА ПРИ ДОБАВЛЕНИИ ФОНА: {e}")
 
-    if (converted or background_added):
-        download_path = "final_image.png" if background_added and os.path.exists("final_image.png") else "output_map.png"
-        if os.path.exists(download_path):
-            with open(download_path, "rb") as file:
-                st.download_button(
-                    label="СКАЧАТЬ",
-                    data=file,
-                    file_name=download_path,
-                    mime="image/png",
-                    key="download-btn",
-                    help="Скачать текущее изображение"
-                )
+    download_path = "final_image.png" if background_added and os.path.exists("final_image.png") else "output_map.png"
+    if os.path.exists(download_path):
+        with open(download_path, "rb") as file:
+            st.download_button(
+                label="СКАЧАТЬ",
+                data=file,
+                file_name=download_path,
+                mime="image/png",
+                key="download-btn"
+            )
 
 st.markdown("""
-<footer style="color: #aaa; font-size: 0.8rem; margin-top: 3rem;">
+<footer>
     © Brawl Stars Вики<br><br>
     Данный контент не связан с компанией Supercell, не поддерживается, не спонсируется и не был утвержден ею, и компания Supercell не несет за него ответственность.
-    Для получения большей информации смотрите <a href="https://supercell.com/en/fan-content-policy/" target="_blank" style="color:#4CAF50;">Правила Supercell для фанатского контента</a>.
+    Для получения большей информации смотрите <a href="https://supercell.com/en/fan-content-policy/" target="_blank">Правила Supercell для фанатского контента</a>.
 </footer>
 """, unsafe_allow_html=True)
-
-st.markdown('</div>', unsafe_allow_html=True)
