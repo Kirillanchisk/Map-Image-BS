@@ -108,6 +108,7 @@ if uploaded_file is not None:
                 mime="image/png"
             )
 
+
 st.markdown("""
 <hr style="border-color: #555;">
 <div style="text-align: center; color: #aaa; font-size: 0.9rem; margin-top: 1rem;">
@@ -117,12 +118,31 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
+
 if os.path.exists("logo.png"):
-    st.markdown(
-        """
-        <div style="text-align: center; margin-top: 1rem;">
-            <img src="logo.png" alt="logo" style="width: 80px; opacity: 0.8;" />
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+    st.markdown("<hr style='border-color: #555;'>", unsafe_allow_html=True)
+    st.markdown('<div style="text-align: center; margin-top: 20px;">', unsafe_allow_html=True)
+    st.image("logo.png", width=80)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+counter_file = "counter.txt"
+def increment_counter():
+    count = 0
+    if os.path.exists(counter_file):
+        try:
+            with open(counter_file, "r") as f:
+                count = int(f.read())
+        except:
+            count = 0
+    count += 1
+    with open(counter_file, "w") as f:
+        f.write(str(count))
+    return count
+
+visits = increment_counter()
+
+st.markdown(f"""
+<div style="text-align: center; color: #aaa; font-size: 0.9rem; margin-top: 10px;">
+    Посетителей всего: {visits}
+</div>
+""", unsafe_allow_html=True)
