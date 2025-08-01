@@ -114,12 +114,15 @@ st.markdown("""
 <div style="text-align: center; color: #aaa; font-size: 0.9rem; margin-top: 1rem;">
     Сайт Map Image предназначен для преобразования изображений в карту размером 60x60 блоков из Brawl Stars. Мы не несём ответственности за созданный контент. Проект находится в разработке. Благодарим за использование и продвижение.<br><br><br>
     Данный контент не связан с компанией Supercell, не поддерживается, не спонсируется и не был утвержден ею. Для получения большей информации смотрите <a href="https://supercell.com/en/fan-content-policy/" target="_blank" style="color:#4CAF50;">Правила Supercell для фанатского контента</a>.<br><br>
-    if os.path.exists("logo.png"):
-    st.image("logo.png", width=80)
     © Brawl Stars Вики 2025
 </div>
 """, unsafe_allow_html=True)
 
+    if os.path.exists("logo.png"):
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            st.image("logo.png", width=80)
+        
 counter_file = "counter.txt"
 def increment_counter():
     count = 0
@@ -140,4 +143,5 @@ st.markdown(f"""
     Посетителей за всё время: {visits}
 </div>
 """, unsafe_allow_html=True)
+
 
