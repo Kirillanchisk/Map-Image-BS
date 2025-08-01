@@ -2,6 +2,7 @@ import streamlit as st
 from PIL import Image
 import subprocess
 import os
+import base64
 
 st.set_page_config(page_title="Map Image by BSW", layout="centered", initial_sidebar_state="auto")
 
@@ -31,7 +32,7 @@ h1 {
     margin-bottom: 2rem;
 }
 
-.stButton>button, .custom-download-button {
+.stButton>button {
     display: block;
     margin: 1rem auto;
     background-color: #4CAF50;
@@ -44,11 +45,30 @@ h1 {
     font-family: 'Inter', sans-serif;
     transition: background-color 0.3s ease;
     min-width: 240px;
-    text-align: center;
-    text-decoration: none;
 }
 
-.stButton>button:hover, .custom-download-button:hover {
+.stButton>button:hover {
+    background-color: #45a049;
+    cursor: pointer;
+}
+
+.custom-download-button {
+    display: block;
+    text-align: center;
+    background-color: #4CAF50;
+    color: white;
+    border-radius: 12px;
+    padding: 0.75rem 1.5rem;
+    font-size: 1.2rem;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    text-decoration: none;
+    width: fit-content;
+    margin: 1rem auto;
+    transition: background-color 0.3s ease;
+}
+
+.custom-download-button:hover {
     background-color: #45a049;
     cursor: pointer;
 }
@@ -75,7 +95,7 @@ footer a:hover {
 st.markdown('<h1>MAP IMAGE</h1>', unsafe_allow_html=True)
 
 uploaded_file = st.file_uploader("ЗАГРУЗИТЬ ИЗОБРАЖЕНИЕ", type=["png", "jpg", "jpeg"])
-
+add_background = False
 final_image_path = None
 
 if uploaded_file is not None:
@@ -84,44 +104,35 @@ if uploaded_file is not None:
 
     st.image("input_image.png", caption="ИСХОДНОЕ ИЗОБРАЖЕНИЕ", use_container_width=True)
 
-    add_background = st.checkbox("Добавить фон", value=True, help="Рекомендуем добавить серый фон к карте для лучшего вида изображения.")
+    add_background = st.checkbox("Добавить фон", help="Рекомендуем добавить серый фон к карте для лучшего вида изображения.")
 
-    if st.button("ПРЕОБРАЗОВАТЬ"):
+    if st.button("ПРЕОБРАЗОВАТЬ В КАРТУ"):
         try:
-            subprocess.run(["python3", "map_converter.py", "input_image.png", "output_map.png"], check=True)
+            subprocess.run(
+                ["python3", "map_converter.py", "input_image.png", "output_map.png"],
+                check=True
+            )
+            st.success("КАРТА УСПЕШНО СОЗДАНА!")
+            st.image("output_map.png", caption="КАРТА С ПРОЗРАЧНЫМ ФОНОМ", use_container_width=True)
 
             if add_background:
                 subprocess.run(["python3", "export.py"], check=True)
+                st.success("ФОН УСПЕШНО ДОБАВЛЕН!")
+                st.image("final_image.png", caption="КАРТА С ФОНОМ", use_container_width=True)
                 final_image_path = "final_image.png"
-                st.success("КАРТА С ФОНОМ УСПЕШНО СОЗДАНА!")
-                st.image(final_image_path, caption="КАРТА С ФОНОМ", use_container_width=True)
             else:
                 final_image_path = "output_map.png"
-                st.success("КАРТА С ПРОЗРАЧНЫМ ФОНОМ УСПЕШНО СОЗДАНА!")
-                st.image(final_image_path, caption="КАРТА С ПРОЗРАЧНЫМ ФОНОМ", use_container_width=True)
 
         except subprocess.CalledProcessError as e:
             st.error(f"ОШИБКА ПРИ ОБРАБОТКЕ ИЗОБРАЖЕНИЯ: {e}")
 
-    # Кастомная стильная кнопка СКАЧАТЬ
-    if final_image_path and os.path.exists(final_image_path):
-        with open(final_image_path, "rb") as file:
-            btn = st.download_button(
-                label="СКАЧАТЬ",
-                data=file,
-                file_name=final_image_path,
-                mime="image/png",
-                key="download-btn"
-            )
-
-        # Костыль для того, чтобы она выглядела как наши кнопки
-        st.markdown(f"""
-            <style>
-            #{st.session_state.get('download-btn')} {{
-                all: unset;
-            }}
-            </style>
-        """, unsafe_allow_html=True)
+# Кастомная кнопка скачивания
+if final_image_path and os.path.exists(final_image_path):
+    with open(final_image_path, "rb") as file:
+        image_bytes = file.read()
+        b64 = base64.b64encode(image_bytes).decode()
+        href = f'<a href="data:image/png;base64,{b64}" download="{final_image_path}" class="custom-download-button">СКАЧАТЬ</a>'
+        st.markdown(href, unsafe_allow_html=True)
 
 st.markdown("""
 <footer>
