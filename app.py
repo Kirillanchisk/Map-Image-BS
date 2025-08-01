@@ -31,7 +31,7 @@ h1 {
     margin-bottom: 2rem;
 }
 
-.stButton>button {
+.stButton>button, .custom-download-button {
     display: block;
     margin: 1rem auto;
     background-color: #4CAF50;
@@ -44,9 +44,11 @@ h1 {
     font-family: 'Inter', sans-serif;
     transition: background-color 0.3s ease;
     min-width: 240px;
+    text-align: center;
+    text-decoration: none;
 }
 
-.stButton>button:hover {
+.stButton>button:hover, .custom-download-button:hover {
     background-color: #45a049;
     cursor: pointer;
 }
@@ -86,11 +88,9 @@ if uploaded_file is not None:
 
     if st.button("ПРЕОБРАЗОВАТЬ"):
         try:
-            # Шаг 1: Преобразуем изображение в карту
             subprocess.run(["python3", "map_converter.py", "input_image.png", "output_map.png"], check=True)
 
             if add_background:
-                # Шаг 2: Добавляем фон
                 subprocess.run(["python3", "export.py"], check=True)
                 final_image_path = "final_image.png"
                 st.success("КАРТА С ФОНОМ УСПЕШНО СОЗДАНА!")
@@ -103,14 +103,25 @@ if uploaded_file is not None:
         except subprocess.CalledProcessError as e:
             st.error(f"ОШИБКА ПРИ ОБРАБОТКЕ ИЗОБРАЖЕНИЯ: {e}")
 
+    # Кастомная стильная кнопка СКАЧАТЬ
     if final_image_path and os.path.exists(final_image_path):
         with open(final_image_path, "rb") as file:
-            st.download_button(
+            btn = st.download_button(
                 label="СКАЧАТЬ",
                 data=file,
                 file_name=final_image_path,
-                mime="image/png"
+                mime="image/png",
+                key="download-btn"
             )
+
+        # Костыль для того, чтобы она выглядела как наши кнопки
+        st.markdown(f"""
+            <style>
+            #{st.session_state.get('download-btn')} {{
+                all: unset;
+            }}
+            </style>
+        """, unsafe_allow_html=True)
 
 st.markdown("""
 <footer>
