@@ -117,11 +117,6 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-if os.path.exists("logo.png"):
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        st.image("logo.png", width=80)
-
 counter_file = "counter.txt"
 
 def increment_counter():
@@ -143,3 +138,4 @@ st.markdown(f"""
     Посетителей за последнее время: {visits}
 </div>
 """, unsafe_allow_html=True)
+
