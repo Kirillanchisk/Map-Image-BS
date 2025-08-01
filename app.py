@@ -2,17 +2,20 @@ import streamlit as st
 from PIL import Image
 import subprocess
 import os
-import base64
 
-st.set_page_config(page_title="Map Image by BSW", layout="centered", initial_sidebar_state="auto")
+st.set_page_config(page_title="BSW — Map Image", layout="centered", initial_sidebar_state="auto")
 
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter&display=swap&subset=cyrillic');
+@font-face {
+    font-family: 'Lilita One';
+    src: url('https://fankit.supercell.com/api/assets/YvtsWV4pUQVm/files/LilitaOne-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
 
-body, #root > div {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
-                 Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+body, html, [class*="css"] {
+    font-family: 'Lilita One', sans-serif;
     background-color: #2f2f2f;
     color: white;
 }
@@ -30,6 +33,7 @@ h1 {
     font-weight: 800;
     font-size: 3rem;
     margin-bottom: 2rem;
+    font-family: 'Lilita One', sans-serif;
 }
 
 .stButton>button {
@@ -42,7 +46,7 @@ h1 {
     font-size: 1.2rem;
     font-weight: 700;
     border: none;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Lilita One', sans-serif;
     transition: background-color 0.3s ease;
     min-width: 240px;
 }
@@ -52,33 +56,12 @@ h1 {
     cursor: pointer;
 }
 
-.custom-download-button {
-    display: block;
-    text-align: center;
-    background-color: #4CAF50;
-    color: white;
-    border-radius: 12px;
-    padding: 0.75rem 1.5rem;
-    font-size: 1.2rem;
-    font-weight: 700;
-    font-family: 'Inter', sans-serif;
-    text-decoration: none;
-    width: fit-content;
-    margin: 1rem auto;
-    transition: background-color 0.3s ease;
-}
-
-.custom-download-button:hover {
-    background-color: #45a049;
-    cursor: pointer;
-}
-
 footer {
     color: #aaa;
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     margin-top: 3rem;
     text-align: center;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Lilita One', sans-serif;
 }
 
 footer a {
@@ -89,13 +72,19 @@ footer a {
 footer a:hover {
     text-decoration: underline;
 }
+
+footer img {
+    margin-top: 1rem;
+    width: 80px;
+    opacity: 0.8;
+}
 </style>
 """, unsafe_allow_html=True)
 
 st.markdown('<h1>MAP IMAGE</h1>', unsafe_allow_html=True)
 
 uploaded_file = st.file_uploader("ЗАГРУЗИТЬ ИЗОБРАЖЕНИЕ", type=["png", "jpg", "jpeg"])
-add_background = False
+
 final_image_path = None
 
 if uploaded_file is not None:
@@ -104,40 +93,39 @@ if uploaded_file is not None:
 
     st.image("input_image.png", caption="ИСХОДНОЕ ИЗОБРАЖЕНИЕ", use_container_width=True)
 
-    add_background = st.checkbox("Добавить фон", help="Рекомендуем добавить серый фон к карте для лучшего вида изображения.")
+    add_background = st.checkbox("Добавить фон", value=True, help="Рекомендуем добавить серый фон к карте для лучшего вида изображения.")
 
     if st.button("ПРЕОБРАЗОВАТЬ В КАРТУ"):
         try:
-            subprocess.run(
-                ["python3", "map_converter.py", "input_image.png", "output_map.png"],
-                check=True
-            )
-            st.success("КАРТА УСПЕШНО СОЗДАНА!")
-            st.image("output_map.png", caption="КАРТА С ПРОЗРАЧНЫМ ФОНОМ", use_container_width=True)
+            subprocess.run(["python3", "map_converter.py", "input_image.png", "output_map.png"], check=True)
 
             if add_background:
                 subprocess.run(["python3", "export.py"], check=True)
-                st.success("ФОН УСПЕШНО ДОБАВЛЕН!")
-                st.image("final_image.png", caption="КАРТА С ФОНОМ", use_container_width=True)
                 final_image_path = "final_image.png"
+                st.success("КАРТА С ФОНОМ УСПЕШНО СОЗДАНА!")
+                st.image(final_image_path, caption="КАРТА С ФОНОМ", use_container_width=True)
             else:
                 final_image_path = "output_map.png"
+                st.success("КАРТА С ПРОЗРАЧНЫМ ФОНОМ УСПЕШНО СОЗДАНА!")
+                st.image(final_image_path, caption="КАРТА С ПРОЗРАЧНЫМ ФОНОМ", use_container_width=True)
 
         except subprocess.CalledProcessError as e:
             st.error(f"ОШИБКА ПРИ ОБРАБОТКЕ ИЗОБРАЖЕНИЯ: {e}")
 
-# Кастомная кнопка скачивания
-if final_image_path and os.path.exists(final_image_path):
-    with open(final_image_path, "rb") as file:
-        image_bytes = file.read()
-        b64 = base64.b64encode(image_bytes).decode()
-        href = f'<a href="data:image/png;base64,{b64}" download="{final_image_path}" class="custom-download-button">СКАЧАТЬ</a>'
-        st.markdown(href, unsafe_allow_html=True)
+    if final_image_path and os.path.exists(final_image_path):
+        with open(final_image_path, "rb") as file:
+            st.download_button(
+                label="СКАЧАТЬ",
+                data=file,
+                file_name=final_image_path,
+                mime="image/png"
+            )
 
 st.markdown("""
 <footer>
-    © Brawl Stars Вики<br><br>
-    Данный контент не связан с компанией Supercell, не поддерживается, не спонсируется и не был утвержден ею, и компания Supercell не несет за него ответственность.
-    Для получения большей информации смотрите <a href="https://supercell.com/en/fan-content-policy/" target="_blank">Правила Supercell для фанатского контента</a>.
+    Сайт Map Image предназначен для преобразования изображений в игровую карту размером 60х60 блоков из Brawl Stars. Мы не несём ответственности за созданный контент на сайте. Проект находится в стадии разработки. Благодарим за использование и продвижение.<br><br>
+    Данный контент не связан с компанией Supercell, не поддерживается, не спонсируется и не был утвержден ею, и компания Supercell не несет за него ответственность. Для получения большей информации смотрите <a href="https://supercell.com/en/fan-content-policy/" target="_blank">Правила Supercell для фанатского контента</a>.<br>
+    © Brawl Stars Вики 2025<br>
+    <img src="logo.png" alt="logo">
 </footer>
 """, unsafe_allow_html=True)
