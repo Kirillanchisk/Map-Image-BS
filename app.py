@@ -79,7 +79,7 @@ if uploaded_file is not None:
     add_background = st.checkbox(
         "Добавить фон?", 
         value=True, 
-        help="Рекомендуем добавить серый фон к карте для лучшего вида изображения."
+        help="Рекомендуем добавить серый фон к карте для лучшего вида изображения. Если вам нужен прозрачный фон, то не используйте эту функцию."
     )
 
     if st.button("ПРЕОБРАЗОВАТЬ В КАРТУ"):
@@ -108,7 +108,6 @@ if uploaded_file is not None:
                 mime="image/png"
             )
 
-
 st.markdown("""
 <hr style="border-color: #555;">
 <div style="text-align: center; color: #aaa; font-size: 0.9rem; margin-top: 1rem;">
@@ -118,12 +117,13 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-    if os.path.exists("logo.png"):
-        col1, col2, col3 = st.columns([1, 2, 1])
-        with col2:
-            st.image("logo.png", width=80)
-        
+if os.path.exists("logo.png"):
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        st.image("logo.png", width=80)
+
 counter_file = "counter.txt"
+
 def increment_counter():
     count = 0
     if os.path.exists(counter_file):
@@ -136,12 +136,10 @@ def increment_counter():
     with open(counter_file, "w") as f:
         f.write(str(count))
     return count
-    
+
 visits = increment_counter()
 st.markdown(f"""
 <div style="text-align: center; color: #aaa; font-size: 0.9rem; margin-top: 10px;">
-    Посетителей за всё время: {visits}
+    Посетителей за последнее время: {visits}
 </div>
 """, unsafe_allow_html=True)
-
-
