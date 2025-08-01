@@ -1,5 +1,4 @@
 import streamlit as st
-from PIL import Image
 import subprocess
 import os
 
@@ -7,17 +6,10 @@ st.set_page_config(page_title="BSW — Map Image", layout="centered", initial_si
 
 st.markdown("""
 <style>
-@font-face {
-    font-family: 'Lilita One';
-    src: url('https://fankit.supercell.com/api/assets/YvtsWV4pUQVm/files/LilitaOne-Regular.ttf') format('truetype');
-    font-weight: normal;
-    font-style: normal;
-}
-
 body, html, [class*="css"] {
-    font-family: 'Lilita One', sans-serif;
     background-color: #2f2f2f;
     color: white;
+    font-family: sans-serif;
 }
 
 .block-container {
@@ -33,7 +25,6 @@ h1 {
     font-weight: 800;
     font-size: 3rem;
     margin-bottom: 2rem;
-    font-family: 'Lilita One', sans-serif;
 }
 
 .stButton>button {
@@ -46,9 +37,8 @@ h1 {
     font-size: 1.2rem;
     font-weight: 700;
     border: none;
-    font-family: 'Lilita One', sans-serif;
-    transition: background-color 0.3s ease;
     min-width: 240px;
+    transition: background-color 0.3s ease;
 }
 
 .stButton>button:hover {
@@ -61,7 +51,6 @@ footer {
     font-size: 0.9rem;
     margin-top: 3rem;
     text-align: center;
-    font-family: 'Lilita One', sans-serif;
 }
 
 footer a {
@@ -71,12 +60,6 @@ footer a {
 
 footer a:hover {
     text-decoration: underline;
-}
-
-footer img {
-    margin-top: 1rem;
-    width: 80px;
-    opacity: 0.8;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -93,7 +76,11 @@ if uploaded_file is not None:
 
     st.image("input_image.png", caption="ИСХОДНОЕ ИЗОБРАЖЕНИЕ", use_container_width=True)
 
-    add_background = st.checkbox("Добавить фон", value=True, help="Рекомендуем добавить серый фон к карте для лучшего вида изображения.")
+    add_background = st.checkbox(
+        "Добавить фон?", 
+        value=True, 
+        help="Рекомендуем добавить серый фон к карте для лучшего вида изображения."
+    )
 
     if st.button("ПРЕОБРАЗОВАТЬ В КАРТУ"):
         try:
@@ -122,10 +109,13 @@ if uploaded_file is not None:
             )
 
 st.markdown("""
-<footer>
-    Сайт Map Image предназначен для преобразования изображений в игровую карту размером 60х60 блоков из Brawl Stars. Мы не несём ответственности за созданный контент на сайте. Проект находится в стадии разработки. Благодарим за использование и продвижение.<br><br>
-    Данный контент не связан с компанией Supercell, не поддерживается, не спонсируется и не был утвержден ею, и компания Supercell не несет за него ответственность. Для получения большей информации смотрите <a href="https://supercell.com/en/fan-content-policy/" target="_blank">Правила Supercell для фанатского контента</a>.<br>
-    © Brawl Stars Вики 2025<br>
-    <img src="logo.png" alt="logo">
-</footer>
+<hr style="border-color: #555;">
+<div style="text-align: center; color: #aaa; font-size: 0.9rem; margin-top: 1rem;">
+    Сайт Map Image предназначен для преобразования изображений в карту размером 60x60 блоков из Brawl Stars. Мы не несём ответственности за созданный контент. Проект находится в разработке. Благодарим за использование и продвижение.<br><br><br>
+    Данный контент не связан с компанией Supercell, не поддерживается, не спонсируется и не был утвержден ею. Для получения большей информации смотрите<a href="https://supercell.com/en/fan-content-policy/" target="_blank" style="color:#4CAF50;">Правила Supercell для фанатского контента</a>.<br><br>
+    © Brawl Stars Вики 2025
+</div>
 """, unsafe_allow_html=True)
+
+if os.path.exists("logo.png"):
+    st.image("logo.png", width=80)
