@@ -4,12 +4,7 @@
 
 ## Установка
 
-Склонируйте репозиторий:
-
-```bash
-git clone https://github.com/Kirillanchisk/Map-Image-BS.git
-cd Map-Image-BS
-```
+Скачайте репозиторий.
 
 Убедитесь, что у вас установлен Python (3.10+), затем установите зависимости:
 
